@@ -71,7 +71,7 @@ input, select, textarea { font-family: inherit; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scaleIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
 @keyframes popIn { 0% { opacity: 0; transform: scale(0.85); } 60% { opacity: 1; transform: scale(1.03); } 100% { transform: scale(1); } }
-@keyframes floatBlob { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(3%,-4%) scale(1.06); } 66% { transform: translate(-3%,3%) scale(0.96); } }
+@keyframes floatBlob { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(1.5%,-2%) scale(1.03); } 66% { transform: translate(-1.5%,1.5%) scale(0.98); } }
 @keyframes breathe { 0%, 100% { box-shadow: var(--shadow-lift), 0 0 0 0 var(--accent-soft); } 50% { box-shadow: var(--shadow-lift), 0 0 0 10px transparent; } }
 @keyframes badgePulse { 0% { box-shadow: 0 0 0 0 rgba(168,62,62,0.55); } 70% { box-shadow: 0 0 0 7px rgba(168,62,62,0); } 100% { box-shadow: 0 0 0 0 rgba(168,62,62,0); } }
 @keyframes checkPop { 0% { transform: scale(0.5) rotate(-8deg); opacity: 0; } 60% { transform: scale(1.15) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
@@ -141,14 +141,14 @@ input, select, textarea { font-family: inherit; }
   background: var(--bg); padding: 24px; position: relative; overflow: hidden;
 }
 .login-bg-blob {
-  position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.35; pointer-events: none;
-  animation: floatBlob 16s ease-in-out infinite;
+  position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.16; pointer-events: none;
+  animation: floatBlob 26s ease-in-out infinite;
 }
-.login-bg-blob.b1 { width: 420px; height: 420px; background: var(--accent); top: -120px; left: -100px; animation-duration: 18s; }
-.login-bg-blob.b2 { width: 360px; height: 360px; background: var(--warn); bottom: -140px; right: -80px; animation-duration: 22s; animation-delay: -6s; opacity: 0.22; }
-.login-bg-blob.b3 { width: 280px; height: 280px; background: var(--accent); top: 40%; right: 8%; animation-duration: 20s; animation-delay: -3s; opacity: 0.16; }
+.login-bg-blob.b1 { width: 420px; height: 420px; background: var(--accent); top: -120px; left: -100px; animation-duration: 28s; }
+.login-bg-blob.b2 { width: 360px; height: 360px; background: var(--warn); bottom: -140px; right: -80px; animation-duration: 32s; animation-delay: -6s; opacity: 0.1; }
+.login-bg-blob.b3 { width: 280px; height: 280px; background: var(--accent); top: 40%; right: 8%; animation-duration: 30s; animation-delay: -3s; opacity: 0.08; }
 .login-bg-grid {
-  position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.25;
   background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size: 42px 42px; mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 0%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 0%, transparent 75%);
