@@ -78,17 +78,16 @@ input, select, textarea { font-family: inherit; }
 @keyframes ripple-anim { to { transform: scale(2.6); opacity: 0; } }
 @keyframes spinGlow { to { transform: rotate(360deg); } }
 @keyframes underlineIn { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@keyframes clapFloat {
-  0% { opacity: 0; transform: translate(-50%,-50%) scale(0.3) rotate(0deg); }
-  18% { opacity: 1; transform: translate(-50%,-50%) scale(1.25) rotate(calc(var(--rot) * 0.3)); }
-  100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1) rotate(var(--rot)); }
-}
 @keyframes flameFlicker { 0%, 100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.18) rotate(3deg); } }
+@keyframes particleBurst {
+  0% { opacity: 1; transform: translate(-50%,-50%) scale(0.5); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1); }
+}
 
-.clap-burst { position: fixed; inset: 0; z-index: 999; pointer-events: none; }
-.clap-particle {
-  position: fixed; pointer-events: none; will-change: transform, opacity;
-  animation: clapFloat 0.95s var(--ease-out) forwards; line-height: 1;
+.completion-burst { position: fixed; inset: 0; z-index: 999; pointer-events: none; }
+.burst-particle {
+  position: fixed; width: 6px; height: 6px; border-radius: 50%; pointer-events: none;
+  will-change: transform, opacity; animation: particleBurst 0.55s var(--ease-out) forwards;
 }
 
 .stat-num-row { display: flex; align-items: center; gap: 4px; }
@@ -329,7 +328,21 @@ input, select, textarea { font-family: inherit; }
 .task-card.just-completed { animation: checkPop 0.45s var(--ease-out) both; }
 .task-card.removing { animation: cardRemove 0.28s var(--ease-out) forwards; pointer-events: none; }
 @keyframes cardRemove { to { opacity: 0; transform: scale(0.9) translateY(-6px); max-height: 0; margin: 0; padding-top: 0; padding-bottom: 0; } }
-.tc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.tc-top { display: flex; align-items: flex-start; gap: 9px; }
+.tc-top .tc-title { flex: 1; }
+
+.task-checkbox {
+  width: 19px; height: 19px; border-radius: 6px; border: 1.7px solid var(--border); background: var(--card);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0;
+  margin-top: 1px; position: relative; transition: border-color 0.18s ease, background 0.18s ease, transform 0.15s var(--ease-out);
+}
+.task-checkbox:hover { border-color: var(--accent); transform: scale(1.1); }
+.task-checkbox:active { transform: scale(0.92); }
+.task-checkbox.checked { background: var(--accent); border-color: var(--accent); animation: checkboxPop 0.4s var(--ease-out); }
+.check-glyph { color: var(--accent-contrast); font-size: 11px; font-weight: 800; line-height: 1; opacity: 0; transform: scale(0.4) rotate(-20deg); display: block; }
+.task-checkbox.checked .check-glyph { animation: checkGlyphPop 0.4s var(--ease-out) forwards; }
+@keyframes checkboxPop { 0% { transform: scale(1); } 45% { transform: scale(1.28); } 100% { transform: scale(1); } }
+@keyframes checkGlyphPop { 0% { opacity: 0; transform: scale(0.3) rotate(-25deg); } 55% { opacity: 1; transform: scale(1.3) rotate(8deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
 .tc-title { font-size: 14px; font-weight: 700; margin: 0; line-height: 1.35; }
 .completed-card .tc-title { color: var(--text-2); font-weight: 600; text-decoration: line-through; text-decoration-color: var(--text-3); }
 .tc-menu-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 15px; padding: 2px 4px; border-radius: 6px; flex-shrink: 0; }
@@ -1055,33 +1068,39 @@ input, select, textarea { font-family: inherit; }
     pageEl.style.animation = '';
   }
 
-  function triggerClapBurst(originEl){
+  function triggerCompletionBurst(originEl){
     if (!originEl || !originEl.getBoundingClientRect) return;
     var rect = originEl.getBoundingClientRect();
     var cx = rect.left + rect.width / 2;
     var cy = rect.top + rect.height / 2;
     var container = document.createElement('div');
-    container.className = 'clap-burst';
+    container.className = 'completion-burst';
     document.body.appendChild(container);
-    var count = 10;
+    var colors = ['var(--accent)', 'var(--accent)', 'var(--warn)', 'var(--text-3)'];
+    var count = 7;
     for (var i = 0; i < count; i++) {
       var span = document.createElement('span');
-      span.className = 'clap-particle';
-      span.textContent = '👏';
-      var angle = (Math.PI * 2 * i / count) + (Math.random() * 0.5 - 0.25);
-      var dist = 55 + Math.random() * 65;
+      span.className = 'burst-particle';
+      var angle = (Math.PI * 2 * i / count) + (Math.random() * 0.4 - 0.2);
+      var dist = 20 + Math.random() * 22;
       var tx = Math.cos(angle) * dist;
-      var ty = Math.sin(angle) * dist - 45;
+      var ty = Math.sin(angle) * dist;
       span.style.left = cx + 'px';
       span.style.top = cy + 'px';
+      span.style.background = colors[i % colors.length];
       span.style.setProperty('--tx', tx + 'px');
       span.style.setProperty('--ty', ty + 'px');
-      span.style.setProperty('--rot', (Math.random() * 70 - 35) + 'deg');
-      span.style.animationDelay = (Math.random() * 0.12) + 's';
-      span.style.fontSize = (15 + Math.random() * 11) + 'px';
+      span.style.animationDelay = (Math.random() * 0.05) + 's';
       container.appendChild(span);
     }
-    setTimeout(function(){ container.remove(); }, 1150);
+    setTimeout(function(){ container.remove(); }, 650);
+  }
+
+  function popCheckbox(el){
+    if (!el || !el.classList) return;
+    if (el.classList.contains('task-checkbox') || el.classList.contains('day-check')) {
+      el.classList.add('checked');
+    }
   }
 
   function updateStreakUI(){
@@ -1183,12 +1202,13 @@ input, select, textarea { font-family: inherit; }
     }
     var ds = dueStatus(t);
     return '<div class="task-card" data-id="' + t.id + '" draggable="true">' +
-      '<div class="tc-top"><h4 class="tc-title">' + escapeHtml(t.title) + '</h4>' +
+      '<div class="tc-top">' +
+      '<button class="task-checkbox" data-complete="' + t.id + '" aria-label="Mark task complete"><span class="check-glyph">✓</span></button>' +
+      '<h4 class="tc-title">' + escapeHtml(t.title) + '</h4>' +
       '<button class="tc-menu-btn" data-menu="' + t.id + '">⋮</button></div>' +
       '<div class="tc-meta"><span class="tc-cat">' + catIcon(t.category) + ' ' + t.category + '</span><span>·</span>' +
       '<span class="tc-due ' + (ds === 'overdue' ? 'overdue' : ds === 'due-soon' ? 'due-soon' : '') + '">' + dueLabel(t) + '</span></div>' +
-      '<div class="tc-bottom"><span class="priority-pill priority-' + t.priority + '">' + t.priority + ' Priority</span>' +
-      '<button class="tc-complete-btn" data-complete="' + t.id + '">○ Complete</button></div></div>';
+      '<div class="tc-bottom"><span class="priority-pill priority-' + t.priority + '">' + t.priority + ' Priority</span></div></div>';
   }
 
   function escapeHtml(s){
@@ -1205,7 +1225,7 @@ input, select, textarea { font-family: inherit; }
     document.querySelectorAll('[data-complete]').forEach(function(btn){
       btn.addEventListener('click', function(e){
         e.stopPropagation();
-        completeTask(btn.getAttribute('data-complete'));
+        completeTask(btn.getAttribute('data-complete'), btn);
       });
     });
     document.querySelectorAll('[data-menu]').forEach(function(btn){
@@ -1244,8 +1264,9 @@ input, select, textarea { font-family: inherit; }
   function completeTask(id, originEl){
     var t = state.tasks.find(function(x){ return x.id === id; });
     if (!t || t.status === 'completed') return;
-    var clapOrigin = originEl || document.querySelector('.task-card[data-id="' + id + '"]');
     var boardCard = document.querySelector('#todoList .task-card[data-id="' + id + '"]');
+    var checkboxEl = originEl || (boardCard && boardCard.querySelector('.task-checkbox'));
+    var burstOrigin = checkboxEl || boardCard;
     var onTime = new Date() <= dueDateTime(t);
 
     var finish = function(){
@@ -1257,7 +1278,7 @@ input, select, textarea { font-family: inherit; }
         state.streak += 1;
         if (state.streak > state.bestStreak) state.bestStreak = state.streak;
         persistStreak();
-        showToast('👏 Task completed — ' + state.streak + '-day streak!');
+        showToast('✓ Task completed — ' + state.streak + '-day streak!');
       } else {
         var hadStreak = state.streak > 0;
         state.streak = 0;
@@ -1269,12 +1290,13 @@ input, select, textarea { font-family: inherit; }
       if (newCard) newCard.classList.add('just-completed');
     };
 
-    if (clapOrigin) triggerClapBurst(clapOrigin);
+    popCheckbox(checkboxEl);
+    if (burstOrigin) triggerCompletionBurst(burstOrigin);
     if (boardCard) {
       boardCard.classList.add('removing');
       setTimeout(finish, 260);
     } else {
-      setTimeout(finish, clapOrigin ? 180 : 0);
+      setTimeout(finish, burstOrigin ? 180 : 0);
     }
   }
 
