@@ -1,4 +1,3 @@
-<!doctype html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -331,3 +330,232 @@ input, select, textarea { font-family: inherit; }
   .analytics-grid { grid-template-columns: 1fr; }
   .stat-card.large { grid-column: span 1; }
   .focus-timer { font-size: 56px; letter-spacing: 4px; }
+}
+</style>
+</head>
+<body>
+<div class="app-root">
+
+  <!-- LOGIN VIEW -->
+  <div id="view-login">
+    <div class="login-card">
+      <div class="login-logo">SELF<span>-</span>CHECK PRO</div>
+      <h1 class="login-heading">Welcome</h1>
+      <p class="login-sub">Advanced task management with analytics & focus tools.</p>
+      <div class="field">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" placeholder="your@email.com" value="alex@self-check.app" />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" placeholder="••••••••" value="password" />
+      </div>
+      <button class="btn btn-primary btn-full" id="signInBtn">Sign in</button>
+    </div>
+  </div>
+
+  <!-- APP VIEW -->
+  <div id="view-app" class="hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-text">SELF<span class="mark">-</span>CHECK</span>
+      </div>
+      <nav class="nav-group">
+        <button class="nav-item active" data-view="dashboard"><span class="ic">🏠</span><span class="nav-label">Dashboard</span></button>
+        <button class="nav-item" data-view="focus"><span class="ic">🎯</span><span class="nav-label">Focus</span></button>
+        <button class="nav-item" data-view="analytics"><span class="ic">📊</span><span class="nav-label">Analytics</span></button>
+        <button class="nav-item" data-view="today"><span class="ic">📅</span><span class="nav-label">Today</span></button>
+        <button class="nav-item" data-view="assignments"><span class="ic">📋</span><span class="nav-label">Assignments</span></button>
+        <button class="nav-item" data-view="settings"><span class="ic">⚙</span><span class="nav-label">Settings</span></button>
+      </nav>
+    </aside>
+
+    <main class="main" id="main">
+      <!-- Dashboard -->
+      <section id="page-dashboard" class="page">
+        <div class="topbar">
+          <div>
+            <h1 class="greeting" id="greetingText">Good evening, Alex 👋</h1>
+            <p class="greeting-sub">Your productivity at a glance.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="icon-btn" id="helpBtn" title="Keyboard shortcuts">?</button>
+            <button class="icon-btn" id="focusBtn" title="Focus mode">🎯</button>
+            <div class="avatar" id="avatarBtn">A</div>
+          </div>
+        </div>
+        
+        <div id="dashboardBody"></div>
+      </section>
+
+      <!-- Focus Mode -->
+      <section id="page-focus" class="page">
+        <div class="topbar">
+          <div>
+            <h1 class="greeting">Focus Session</h1>
+            <p class="greeting-sub">Deep work mode. Minimize distractions.</p>
+          </div>
+        </div>
+        <div class="pomodoro-card">
+          <div style="font-size: 14px; color: var(--text-2); font-weight: 600; margin-bottom: 8px;">Pomodoro Timer</div>
+          <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
+          <div class="pomodoro-controls">
+            <button class="btn btn-accent" id="startPomodoroBtn">Start</button>
+            <button class="btn btn-ghost" id="pausePomodoroBtn" disabled>Pause</button>
+            <button class="btn btn-subtle" id="resetPomodoroBtn">Reset</button>
+          </div>
+          <div class="pomodoro-status">
+            <div id="pomodoroStatus">Ready to focus</div>
+          </div>
+        </div>
+        <div id="focusTaskList"></div>
+      </section>
+
+      <!-- Analytics -->
+      <section id="page-analytics" class="page">
+        <div class="topbar">
+          <div>
+            <h1 class="greeting">Analytics</h1>
+            <p class="greeting-sub">Track your productivity trends.</p>
+          </div>
+        </div>
+        <div class="analytics-grid" id="analyticsGrid"></div>
+      </section>
+
+      <!-- Today -->
+      <section id="page-today" class="page hidden">
+        <h1 class="greeting">Today</h1>
+        <div id="todayBody"></div>
+      </section>
+
+      <!-- Assignments -->
+      <section id="page-assignments" class="page hidden">
+        <h1 class="greeting">Assignments</h1>
+        <div id="assignList"></div>
+      </section>
+
+      <!-- Settings -->
+      <section id="page-settings" class="page hidden">
+        <h1 class="greeting">Settings</h1>
+        <div class="empty-state">
+          <h2>⚙️ Settings</h2>
+          <p>Your preferences and configurations.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Focus Mode Overlay -->
+    <div class="focus-mode-overlay" id="focusModeOverlay">
+      <button class="icon-btn" id="exitFocusBtn" style="position: absolute; top: 20px; right: 20px;">✕</button>
+      <div class="focus-task-title" id="focusTaskTitle">Focus on your tasks</div>
+      <div class="focus-timer" id="focusTimer">25:00</div>
+      <div class="pomodoro-status" id="focusStatus">Get ready to focus</div>
+      <div class="focus-controls">
+        <button class="btn btn-accent" id="focusStartBtn">Start Focus</button>
+        <button class="btn btn-ghost" id="focusPauseBtn" style="display:none;">Pause</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div class="shortcuts-modal" id="shortcutsModal">
+    <div class="shortcuts-card">
+      <h3>Keyboard Shortcuts</h3>
+      <div class="shortcut-item">
+        <div class="shortcut-desc">New Task</div>
+        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>N</kbd></div>
+      </div>
+      <div class="shortcut-item">
+        <div class="shortcut-desc">Focus Mode</div>
+        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>F</kbd></div>
+      </div>
+      <div class="shortcut-item">
+        <div class="shortcut-desc">Analytics</div>
+        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>A</kbd></div>
+      </div>
+      <div class="shortcut-item">
+        <div class="shortcut-desc">Toggle Sidebar</div>
+        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>B</kbd></div>
+      </div>
+      <div class="shortcut-item">
+        <div class="shortcut-desc">Search Tasks</div>
+        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>F</kbd></div>
+      </div>
+      <div class="shortcut-item">
+        <div class="shortcut-desc">Close Modal</div>
+        <div class="shortcut-key"><kbd>Esc</kbd></div>
+      </div>
+      <button class="btn btn-accent btn-full" id="closeShortcutsBtn" style="margin-top: 20px;">Close</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var uid = function(){ return 't' + Math.random().toString(36).slice(2,10); };
+  var todayISO = function(){ return new Date().toISOString().slice(0,10); };
+  var TODAY = new Date();
+  var todayStr = todayISO();
+
+  var state = {
+    tasks: [
+      { id: uid(), title:"Complete Java Assignment", category:"Assignment", priority:"High", status:"pending", dueDate: todayStr, dueTime:"19:00", timeEstimate: 120, timeSpent: 45, recurring: "weekly", createdAt: Date.now(), completedAt:null },
+      { id: uid(), title:"Review Python concepts", category:"Study", priority:"Medium", status:"pending", dueDate: todayStr, dueTime:"10:00", timeEstimate: 90, timeSpent: 0, recurring: null, createdAt: Date.now(), completedAt:null },
+      { id: uid(), title:"Project research", category:"Project", priority:"Medium", status:"pending", dueDate: todayStr, dueTime:"14:00", timeEstimate: 180, timeSpent: 60, recurring: null, createdAt: Date.now(), completedAt:null },
+    ],
+    theme: 'light',
+    themeMode: 'light',
+    streak: 5,
+    settings: { emailReminders:true, dueSoon:true, pomodoroLength: 25 },
+    user: { name: 'Alex', email: 'alex@self-check.app' },
+    pomodoroRunning: false,
+    pomodoroTime: 25 * 60,
+    completedToday: 0,
+    totalTimeFocused: 0
+  };
+
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  function escapeHtml(s){
+    var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML;
+  }
+
+  /* ===================== THEME ===================== */
+  function applyTheme(){
+    document.documentElement.setAttribute('data-theme', state.theme);
+  }
+
+  /* ===================== NAVIGATION ===================== */
+  var pages = ['dashboard','focus','analytics','today','assignments','settings'];
+  function goTo(view){
+    pages.forEach(function(p){
+      document.getElementById('page-' + p).classList.toggle('hidden', p !== view);
+    });
+    document.querySelectorAll('.nav-item').forEach(function(n){
+      n.classList.toggle('active', n.getAttribute('data-view') === view);
+    });
+  }
+  document.querySelectorAll('[data-view]').forEach(function(el){
+    el.addEventListener('click', function(){ goTo(el.getAttribute('data-view')); });
+  });
+
+  /* ===================== POMODORO TIMER ===================== */
+  var pomodoroInterval;
+  function updatePomodoroDisplay(){
+    var mins = Math.floor(state.pomodoroTime / 60);
+    var secs = state.pomodoroTime % 60;
+    var display = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+    var el = document.getElementById('pomodoroDisplay');
+    if (el) el.textContent = display;
+    var focusEl = document.getElementById('focusTimer');
+    if (focusEl) focusEl.textContent = display;
+  }
