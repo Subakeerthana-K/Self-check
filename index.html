@@ -174,3 +174,160 @@ input, select, textarea { font-family: inherit; }
   width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--accent-contrast);
   display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; cursor: pointer;
   border: 1px solid var(--border); transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.avatar:hover { transform: translateY(-1px) scale(1.05); box-shadow: var(--shadow-sm); }
+
+/* Focus Mode */
+.focus-mode-overlay {
+  position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none;
+  flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+}
+.focus-mode-overlay.active { display: flex; }
+.focus-timer {
+  font-size: 72px; font-weight: 800; margin: 40px 0; font-variant-numeric: tabular-nums;
+  font-family: 'Courier New', monospace; letter-spacing: 8px;
+}
+.focus-task-title { font-size: 28px; font-weight: 700; margin-bottom: 30px; text-align: center; max-width: 600px; }
+.focus-controls { display: flex; gap: 16px; margin-top: 40px; }
+.focus-controls button { font-size: 16px; padding: 14px 28px; border-radius: 12px; }
+
+/* Pomodoro Timer */
+.pomodoro-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+  text-align: center; margin-bottom: 20px; animation: fadeInUp 0.4s ease both;
+}
+.pomodoro-display {
+  font-size: 48px; font-weight: 800; margin: 20px 0; font-variant-numeric: tabular-nums;
+  font-family: 'Courier New', monospace; letter-spacing: 4px;
+}
+.pomodoro-controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+.pomodoro-status { font-size: 13px; color: var(--text-2); margin-top: 12px; }
+
+/* Analytics */
+.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; animation: fadeInUp 0.4s ease both;
+}
+.stat-card.large { grid-column: span 2; }
+.stat-value { font-size: 32px; font-weight: 800; color: var(--accent); margin: 12px 0 6px; }
+.stat-label { font-size: 13px; color: var(--text-2); font-weight: 600; }
+.stat-trend { font-size: 12px; margin-top: 8px; padding: 6px 12px; border-radius: 6px; background: var(--success-soft); color: var(--success); font-weight: 700; }
+.stat-trend.down { background: var(--danger-soft); color: var(--danger); }
+
+/* Chart */
+.mini-chart { height: 80px; margin: 12px 0; display: flex; align-items: flex-end; gap: 4px; }
+.chart-bar {
+  flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; position: relative;
+  transition: opacity 0.2s ease; cursor: pointer;
+}
+.chart-bar:hover { opacity: 0.8; }
+.chart-bar-label { font-size: 10px; color: var(--text-3); text-align: center; margin-top: 6px; }
+
+/* Time Tracking */
+.time-log {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
+  margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+  animation: fadeInUp 0.35s ease both;
+}
+.time-log-info h4 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+.time-log-info p { margin: 0; font-size: 12px; color: var(--text-2); }
+.time-log-duration { font-size: 16px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+/* Recurring Tasks */
+.recurring-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: var(--accent-soft); color: var(--accent-ink); margin-left: 8px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: var(--overlay); display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.show { opacity: 1; pointer-events: auto; }
+.modal-card {
+  background: var(--card); border-radius: 18px; width: 100%; max-width: 460px; padding: 26px;
+  box-shadow: var(--shadow-lift); max-height: 88vh; overflow-y: auto; transform: translateY(14px) scale(0.98); opacity: 0;
+  transition: transform 0.28s ease, opacity 0.28s ease;
+}
+.modal-overlay.show .modal-card { transform: translateY(0) scale(1); opacity: 1; }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.modal-head h3 { margin: 0; font-size: 18px; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 18px; color: var(--text-3); cursor: pointer; padding: 4px; }
+.modal-close:hover { color: var(--text); }
+.form-row { margin-bottom: 14px; }
+.form-row label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.form-row input, .form-row textarea, .form-row select {
+  width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg);
+  color: var(--text); font-size: 14px; outline: none; resize: none;
+}
+.form-row input:focus, .form-row textarea:focus, .form-row select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.form-row textarea { min-height: 60px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-2); transition: all 0.18s ease; }
+.chip:hover { transform: translateY(-1px); border-color: var(--text-3); }
+.chip.selected { background: var(--text); color: var(--bg); border-color: var(--text); transform: scale(1.02); }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+.checkbox-group { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border-radius: 9px; margin: 8px 0; }
+.checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 26px; left: 26px; background: var(--text); color: var(--bg); padding: 11px 18px;
+  border-radius: 10px; font-size: 13.5px; font-weight: 600; z-index: 500; opacity: 0; transform: translateY(10px) scale(0.96);
+  transition: all 0.3s ease; pointer-events: none; display: flex; align-items: center; gap: 8px;
+}
+.toast.show { opacity: 1; transform: translateY(0) scale(1); }
+
+/* Keyboard Shortcuts */
+.shortcuts-modal {
+  position: fixed; inset: 0; background: var(--overlay); display: flex; align-items: center; justify-content: center;
+  z-index: 300; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+}
+.shortcuts-modal.show { opacity: 1; pointer-events: auto; }
+.shortcuts-card {
+  background: var(--card); border-radius: 16px; width: 100%; max-width: 500px; padding: 30px;
+  box-shadow: var(--shadow-lift); max-height: 80vh; overflow-y: auto; transform: scale(0.95) translateY(20px); opacity: 0;
+  transition: transform 0.28s ease, opacity 0.28s ease;
+}
+.shortcuts-modal.show .shortcuts-card { transform: scale(1) translateY(0); opacity: 1; }
+.shortcuts-card h3 { margin: 0 0 20px; font-size: 20px; font-weight: 700; }
+.shortcut-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: center; }
+.shortcut-item:last-child { border-bottom: none; }
+.shortcut-key {
+  display: flex; gap: 4px; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--text-2);
+}
+.shortcut-key kbd {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px;
+  font-family: 'Courier New', monospace; font-size: 11px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.shortcut-desc { font-size: 13px; color: var(--text); font-weight: 600; }
+
+/* Drag & Drop zones */
+.col { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; min-height: 240px; animation: fadeInUp 0.4s ease both; }
+.col.drag-over { outline: 2px dashed var(--accent); outline-offset: -6px; background: var(--accent-soft); }
+.col-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+.col-sub { font-size: 13px; color: var(--text-2); margin: 3px 0 16px; }
+
+.task-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px;
+  cursor: grab; transition: box-shadow 0.2s ease, transform 0.2s ease; margin-bottom: 10px;
+  animation: fadeInUp 0.35s ease both;
+}
+.task-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.task-card.dragging { opacity: 0.4; }
+.task-card h4 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+.task-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); flex-wrap: wrap; }
+.task-time-estimate { font-size: 11px; background: var(--accent-soft); color: var(--accent-ink); padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-state h2 { font-size: 22px; margin: 0 0 8px; }
+.empty-state p { color: var(--text-2); font-size: 14px; margin: 0 0 22px; }
+
+@media (max-width: 860px) {
+  .sidebar { display: none; }
+  .main { padding: 16px; }
+  .analytics-grid { grid-template-columns: 1fr; }
+  .stat-card.large { grid-column: span 1; }
+  .focus-timer { font-size: 56px; letter-spacing: 4px; }
