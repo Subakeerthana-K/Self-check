@@ -99,3 +99,30 @@ input, select, textarea { font-family: inherit; }
 .btn-sm { padding: 7px 12px; font-size: 13px; border-radius: 8px; }
 .btn-full { width: 100%; }
 .btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text-2); display: flex; align-items: center;
+  justify-content: center; cursor: pointer; font-size: 16px; position: relative;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.icon-btn:hover { background: var(--card-muted); color: var(--text); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.icon-btn:active { transform: scale(0.94); }
+
+/* ================= LOGIN ================= */
+#view-login {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); padding: 24px; position: relative; overflow: hidden;
+}
+.login-card {
+  width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 40px 32px; box-shadow: var(--shadow-md); position: relative; z-index: 1;
+  animation: scaleIn 0.5s ease both;
+}
+.login-logo { font-size: 15px; font-weight: 800; letter-spacing: 0.3px; color: var(--text); margin-bottom: 28px; }
+.login-logo span { color: var(--accent); }
+.login-heading { font-size: 24px; font-weight: 700; margin: 0 0 8px; }
+.login-sub { font-size: 14px; color: var(--text-2); margin: 0 0 28px; line-height: 1.5; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.field input {
