@@ -1,3 +1,4 @@
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -559,3 +560,197 @@ input, select, textarea { font-family: inherit; }
     var focusEl = document.getElementById('focusTimer');
     if (focusEl) focusEl.textContent = display;
   }
+
+  document.getElementById('startPomodoroBtn').addEventListener('click', function(){
+    if (state.pomodoroRunning) return;
+    state.pomodoroRunning = true;
+    document.getElementById('pausePomodoroBtn').disabled = false;
+    document.getElementById('startPomodoroBtn').disabled = true;
+    
+    pomodoroInterval = setInterval(function(){
+      if (state.pomodoroTime > 0) {
+        state.pomodoroTime--;
+        updatePomodoroDisplay();
+      } else {
+        clearInterval(pomodoroInterval);
+        state.pomodoroRunning = false;
+        showToast('🍅 Pomodoro complete! Take a break.');
+        state.pomodoroTime = state.settings.pomodoroLength * 60;
+        updatePomodoroDisplay();
+        document.getElementById('pausePomodoroBtn').disabled = true;
+        document.getElementById('startPomodoroBtn').disabled = false;
+      }
+    }, 1000);
+  });
+
+  document.getElementById('pausePomodoroBtn').addEventListener('click', function(){
+    state.pomodoroRunning = false;
+    clearInterval(pomodoroInterval);
+    document.getElementById('pausePomodoroBtn').disabled = true;
+    document.getElementById('startPomodoroBtn').disabled = false;
+  });
+
+  document.getElementById('resetPomodoroBtn').addEventListener('click', function(){
+    state.pomodoroRunning = false;
+    clearInterval(pomodoroInterval);
+    state.pomodoroTime = state.settings.pomodoroLength * 60;
+    updatePomodoroDisplay();
+    document.getElementById('pausePomodoroBtn').disabled = true;
+    document.getElementById('startPomodoroBtn').disabled = false;
+  });
+
+  /* ===================== FOCUS MODE ===================== */
+  var focusInterval;
+  var focusTime = 0;
+  
+  document.getElementById('focusBtn').addEventListener('click', function(){ document.getElementById('focusModeOverlay').classList.add('active'); });
+  document.getElementById('exitFocusBtn').addEventListener('click', function(){ document.getElementById('focusModeOverlay').classList.remove('active'); });
+
+  document.getElementById('focusStartBtn').addEventListener('click', function(){
+    state.pomodoroRunning = true;
+    focusTime = 0;
+    this.style.display = 'none';
+    document.getElementById('focusPauseBtn').style.display = 'block';
+    document.getElementById('focusStatus').textContent = 'Focus mode active - minimize distractions';
+    
+    focusInterval = setInterval(function(){
+      focusTime++;
+      state.pomodoroTime--;
+      if (state.pomodoroTime < 0) {
+        clearInterval(focusInterval);
+        state.pomodoroRunning = false;
+        state.totalTimeFocused += focusTime;
+        showToast('✓ Focus session complete - ' + Math.floor(focusTime/60) + ' mins focused');
+        document.getElementById('focusModeOverlay').classList.remove('active');
+      }
+      updatePomodoroDisplay();
+    }, 1000);
+  });
+
+  document.getElementById('focusPauseBtn').addEventListener('click', function(){
+    clearInterval(focusInterval);
+    state.pomodoroRunning = false;
+    state.totalTimeFocused += focusTime;
+    this.style.display = 'none';
+    document.getElementById('focusStartBtn').style.display = 'block';
+  });
+
+  /* ===================== ANALYTICS ===================== */
+  function renderAnalytics(){
+    var completed = state.tasks.filter(function(t){ return t.status === 'completed'; }).length;
+    var total = state.tasks.length;
+    var avgTimeSpent = state.tasks.length > 0 ? Math.round(state.tasks.reduce(function(sum, t){ return sum + t.timeSpent; }, 0) / state.tasks.length) : 0;
+    var totalTimeLogged = state.tasks.reduce(function(sum, t){ return sum + t.timeSpent; }, 0);
+
+    var html = '';
+    html += '<div class="stat-card"><div class="stat-value">' + completed + '</div><div class="stat-label">Tasks Completed</div><div class="stat-trend">This week</div></div>';
+    html += '<div class="stat-card"><div class="stat-value">' + state.streak + '</div><div class="stat-label">Day Streak 🔥</div><div class="stat-trend">Keep it up!</div></div>';
+    html += '<div class="stat-card"><div class="stat-value">' + avgTimeSpent + '</div><div class="stat-label">Avg Time per Task</div><div class="stat-label" style="font-size:11px; margin-top:4px;">in minutes</div></div>';
+    html += '<div class="stat-card"><div class="stat-value">' + Math.floor(state.totalTimeFocused/60) + '</div><div class="stat-label">Total Focus Time</div><div class="stat-label" style="font-size:11px; margin-top:4px;">in hours</div></div>';
+
+    html += '<div class="stat-card large"><div style="width:100%;"><div class="stat-label" style="text-align:left; margin-bottom:12px;">Completion by Priority</div>';
+    html += '<div class="mini-chart">';
+    ['High', 'Medium', 'Low'].forEach(function(pri){
+      var count = state.tasks.filter(function(t){ return t.priority === pri; }).length;
+      html += '<div style="flex:1; display:flex; flex-direction:column; align-items:center;"><div class="chart-bar" style="height:' + (count*20) + 'px;"></div><div class="chart-bar-label">' + pri + '</div></div>';
+    });
+    html += '</div></div></div>';
+
+    html += '<div class="stat-card large"><div style="width:100%;"><div class="stat-label" style="text-align:left; margin-bottom:12px;">Time Logged by Category</div>';
+    html += '<div class="mini-chart">';
+    ['Assignment', 'Study', 'Project'].forEach(function(cat){
+      var time = state.tasks.filter(function(t){ return t.category === cat; }).reduce(function(sum, t){ return sum + t.timeSpent; }, 0);
+      html += '<div style="flex:1; display:flex; flex-direction:column; align-items:center;"><div class="chart-bar" style="height:' + (time/10) + 'px;"></div><div class="chart-bar-label">' + Math.round(time/60) + 'h</div></div>';
+    });
+    html += '</div></div></div>';
+
+    document.getElementById('analyticsGrid').innerHTML = html;
+  }
+
+  /* ===================== DASHBOARD ===================== */
+  function renderDashboard(){
+    var pending = state.tasks.filter(function(t){ return t.status === 'pending'; });
+    var html = '';
+    
+    html += '<div style="margin-bottom:24px;"><h2 style="font-size:16px; font-weight:700; margin:0 0 12px;">Your Tasks Today</h2>';
+    if (pending.length === 0) {
+      html += '<div class="empty-state" style="padding:30px;"><p>All tasks completed! 🎉</p></div>';
+    } else {
+      pending.forEach(function(t){
+        var hoursLeft = t.timeEstimate - t.timeSpent;
+        html += '<div class="task-card">' +
+          '<h4>' + escapeHtml(t.title) + '</h4>' +
+          '<div class="task-meta">' +
+          '<span>' + t.category + '</span>' +
+          '<span class="task-time-estimate">⏱ ' + t.timeEstimate + ' min</span>';
+        if (t.recurring) html += '<span class="recurring-badge">↻ ' + t.recurring + '</span>';
+        html += '</div></div>';
+      });
+    }
+    html += '</div>';
+
+    document.getElementById('dashboardBody').innerHTML = html;
+  }
+
+  /* ===================== TODAY PAGE ===================== */
+  function renderToday(){
+    var todays = state.tasks.filter(function(t){ return t.dueDate === todayStr; });
+    var html = '';
+    if (todays.length === 0) {
+      html = '<div class="empty-state"><p>No tasks for today.</p></div>';
+    } else {
+      todays.forEach(function(t){
+        html += '<div class="time-log">' +
+          '<div class="time-log-info"><h4>' + escapeHtml(t.title) + '</h4><p>' + t.dueTime + ' • ' + t.category + '</p></div>' +
+          '<div class="time-log-duration">' + t.timeSpent + '/' + t.timeEstimate + ' min</div></div>';
+      });
+    }
+    document.getElementById('todayBody').innerHTML = html;
+  }
+
+  /* ===================== RENDER ===================== */
+  function render(){
+    renderDashboard();
+    renderAnalytics();
+    renderToday();
+  }
+
+  /* ===================== LOGIN ===================== */
+  function performLogin(){
+    var email = document.getElementById('loginEmail').value.trim();
+    if (!email) return;
+    state.user.email = email;
+    state.user.name = email.split('@')[0];
+    document.getElementById('view-login').classList.add('hidden');
+    document.getElementById('view-app').classList.remove('hidden');
+    document.getElementById('greetingText').textContent = 'Good evening, ' + state.user.name + ' 👋';
+    document.getElementById('avatarBtn').textContent = state.user.name.charAt(0).toUpperCase();
+    applyTheme();
+    render();
+  }
+
+  document.getElementById('signInBtn').addEventListener('click', performLogin);
+  document.getElementById('loginPassword').addEventListener('keydown', function(e){ if (e.key === 'Enter') performLogin(); });
+
+  /* ===================== KEYBOARD SHORTCUTS ===================== */
+  document.addEventListener('keydown', function(e){
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'n') { e.preventDefault(); showToast('+ New task'); }
+      if (e.key === 'f') { e.preventDefault(); goTo('focus'); }
+      if (e.key === 'a') { e.preventDefault(); goTo('analytics'); }
+      if (e.key === 'b') { e.preventDefault(); document.getElementById('sidebar').classList.toggle('collapsed'); }
+    }
+    if (e.key === '?') { document.getElementById('shortcutsModal').classList.add('show'); }
+    if (e.key === 'Escape') { document.getElementById('shortcutsModal').classList.remove('show'); }
+  });
+
+  document.getElementById('helpBtn').addEventListener('click', function(){ document.getElementById('shortcutsModal').classList.add('show'); });
+  document.getElementById('closeShortcutsBtn').addEventListener('click', function(){ document.getElementById('shortcutsModal').classList.remove('show'); });
+  document.getElementById('shortcutsModal').addEventListener('click', function(e){ if (e.target === this) this.classList.remove('show'); });
+
+  /* ===================== INIT ===================== */
+  updatePomodoroDisplay();
+})();
+</script>
+</body>
+</html>
