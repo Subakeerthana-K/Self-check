@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Self-Check Pro - Advanced Task Management</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
@@ -24,7 +25,6 @@
   --danger: #A83E3E;
   --danger-soft: #F5E1DF;
   --success: #2F6F5E;
-  --success-soft: #E4EFEC;
   --shadow-sm: 0 1px 2px rgba(28,27,25,0.05);
   --shadow-md: 0 6px 20px rgba(28,27,25,0.08);
   --shadow-lift: 0 16px 40px rgba(28,27,25,0.16);
@@ -48,7 +48,6 @@
   --danger: #D3837E;
   --danger-soft: #2E1D1C;
   --success: #55A98F;
-  --success-soft: #1E2C27;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
   --shadow-md: 0 6px 20px rgba(0,0,0,0.35);
   --shadow-lift: 0 20px 48px rgba(0,0,0,0.55);
@@ -65,7 +64,7 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
-button { font-family: inherit; }
+button { font-family: inherit; cursor: pointer; }
 input, select, textarea { font-family: inherit; }
 ::selection { background: var(--accent-soft); }
 
@@ -74,8 +73,8 @@ input, select, textarea { font-family: inherit; }
 @keyframes scaleIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
 @keyframes popIn { 0% { opacity: 0; transform: scale(0.85); } 60% { opacity: 1; transform: scale(1.03); } 100% { transform: scale(1); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-@keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@keyframes floatBlob { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(1.5%,-2%) scale(1.03); } 66% { transform: translate(-1.5%,1.5%) scale(0.98); } }
+@keyframes checkPop { 0% { transform: scale(0.5) rotate(-8deg); opacity: 0; } 60% { transform: scale(1.15) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
 
 .app-root { width: 100%; min-height: 100vh; }
 .hidden { display: none !important; }
@@ -84,7 +83,7 @@ input, select, textarea { font-family: inherit; }
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   border-radius: 10px; border: 1px solid transparent; cursor: pointer;
   font-weight: 600; font-size: 14px; padding: 10px 16px;
-  transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+  transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.2s ease;
   white-space: nowrap; position: relative; overflow: hidden;
 }
 .btn:active { transform: scale(0.97); }
@@ -107,21 +106,26 @@ input, select, textarea { font-family: inherit; }
   transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .icon-btn:hover { background: var(--card-muted); color: var(--text); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.icon-btn:active { transform: scale(0.94); }
 
 /* ================= LOGIN ================= */
 #view-login {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
   background: var(--bg); padding: 24px; position: relative; overflow: hidden;
 }
+.login-bg-blob {
+  position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.16; pointer-events: none;
+  animation: floatBlob 26s ease-in-out infinite;
+}
+.login-bg-blob.b1 { width: 420px; height: 420px; background: var(--accent); top: -120px; left: -100px; }
+.login-bg-blob.b2 { width: 360px; height: 360px; background: var(--warn); bottom: -140px; right: -80px; opacity: 0.1; animation-delay: -6s; }
 .login-card {
-  width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border);
-  border-radius: 18px; padding: 40px 32px; box-shadow: var(--shadow-md); position: relative; z-index: 1;
+  width: 100%; max-width: 400px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 40px 32px; box-shadow: var(--shadow-lift); position: relative; z-index: 1;
   animation: scaleIn 0.5s ease both;
 }
 .login-logo { font-size: 15px; font-weight: 800; letter-spacing: 0.3px; color: var(--text); margin-bottom: 28px; }
 .login-logo span { color: var(--accent); }
-.login-heading { font-size: 24px; font-weight: 700; margin: 0 0 8px; }
+.login-heading { font-size: 26px; font-weight: 700; margin: 0 0 8px; }
 .login-sub { font-size: 14px; color: var(--text-2); margin: 0 0 28px; line-height: 1.5; }
 .field { margin-bottom: 16px; }
 .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
@@ -132,20 +136,21 @@ input, select, textarea { font-family: inherit; }
 }
 .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .field input::placeholder { color: var(--text-3); }
-#signInBtn { margin-top: 8px; }
 
 /* ================= APP SHELL ================= */
 #view-app { display: flex; min-height: 100vh; }
 
 .sidebar {
-  width: 232px; flex-shrink: 0; background: var(--bg-2); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; padding: 20px 14px; transition: width 0.28s ease, padding 0.28s ease;
+  width: 240px; flex-shrink: 0; background: var(--bg-2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 20px 14px; transition: width 0.28s ease;
   overflow-y: auto;
 }
-.sidebar.collapsed { width: 76px; padding: 20px 10px; }
+.sidebar.collapsed { width: 76px; }
 .sidebar-logo { font-size: 15px; font-weight: 800; padding: 4px 10px 22px; letter-spacing: 0.3px; display: flex; align-items: center; justify-content: space-between; }
 .sidebar-logo span.mark { color: var(--accent); }
 .sidebar.collapsed .logo-text { display: none; }
+.collapse-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 15px; padding: 4px; border-radius: 6px; transition: all 0.2s ease; }
+.collapse-btn:hover { color: var(--text); background: var(--card-muted); }
 
 .nav-group { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .nav-item {
@@ -162,82 +167,93 @@ input, select, textarea { font-family: inherit; }
 .sidebar.collapsed .nav-item { justify-content: center; }
 
 .main {
-  flex: 1; min-width: 0; padding: 28px 36px 60px; overflow-y: auto;
+  flex: 1; min-width: 0; padding: 28px 36px 80px; overflow-y: auto;
 }
 .page { animation: fadeInUp 0.35s ease both; }
 
 .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 26px; gap: 16px; flex-wrap: wrap; }
-.greeting { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+.greeting { font-size: 28px; font-weight: 700; margin: 0 0 4px; }
 .greeting-sub { font-size: 14px; color: var(--text-2); margin: 0; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
 .avatar {
-  width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--accent-contrast);
+  width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--accent-contrast);
   display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; cursor: pointer;
   border: 1px solid var(--border); transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .avatar:hover { transform: translateY(-1px) scale(1.05); box-shadow: var(--shadow-sm); }
 
-/* Focus Mode */
-.focus-mode-overlay {
-  position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none;
-  flex-direction: column; align-items: center; justify-content: center; padding: 20px;
-}
-.focus-mode-overlay.active { display: flex; }
-.focus-timer {
-  font-size: 72px; font-weight: 800; margin: 40px 0; font-variant-numeric: tabular-nums;
-  font-family: 'Courier New', monospace; letter-spacing: 8px;
-}
-.focus-task-title { font-size: 28px; font-weight: 700; margin-bottom: 30px; text-align: center; max-width: 600px; }
-.focus-controls { display: flex; gap: 16px; margin-top: 40px; }
-.focus-controls button { font-size: 16px; padding: 14px 28px; border-radius: 12px; }
-
-/* Pomodoro Timer */
-.pomodoro-card {
+/* ---- Summary Card ---- */
+.summary-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
-  text-align: center; margin-bottom: 20px; animation: fadeInUp 0.4s ease both;
+  margin-bottom: 24px; display: flex; align-items: center; gap: 40px; flex-wrap: wrap;
+  animation: fadeInUp 0.4s ease both;
+}
+.summary-main { flex: 1; min-width: 200px; }
+.summary-title { font-size: 13px; font-weight: 700; color: var(--text-2); margin: 0 0 12px; }
+.progress-track { height: 8px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 999px; width: 0; transition: width 0.8s ease; }
+.progress-label { font-size: 13px; font-weight: 700; color: var(--text); margin-top: 8px; }
+.summary-stats { display: flex; gap: 32px; }
+.stat { text-align: left; }
+.stat-num { font-size: 28px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 12px; color: var(--text-2); margin-top: 6px; }
+
+/* ---- Kanban Board ---- */
+.board { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.col { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; min-height: 300px; animation: fadeInUp 0.4s ease both; }
+.col-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 4px; }
+.col-title { font-size: 16px; font-weight: 700; margin: 0; }
+.col-sub { font-size: 13px; color: var(--text-2); margin: 4px 0 16px; }
+.task-list { display: flex; flex-direction: column; gap: 12px; }
+.task-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+  cursor: grab; transition: all 0.2s ease; position: relative; animation: fadeInUp 0.35s ease both;
+}
+.task-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.task-card h4 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+.task-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); flex-wrap: wrap; }
+.priority-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.priority-High { background: var(--danger-soft); color: var(--danger); }
+.priority-Medium { background: var(--warn-soft); color: var(--warn); }
+.priority-Low { background: var(--card-muted); color: var(--text-2); }
+.empty-col { text-align: center; padding: 40px 10px; color: var(--text-3); font-size: 13px; }
+
+/* ---- Pomodoro Timer ---- */
+.pomodoro-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px;
+  text-align: center; margin-bottom: 24px; animation: fadeInUp 0.4s ease both;
 }
 .pomodoro-display {
-  font-size: 48px; font-weight: 800; margin: 20px 0; font-variant-numeric: tabular-nums;
-  font-family: 'Courier New', monospace; letter-spacing: 4px;
+  font-size: 56px; font-weight: 800; margin: 24px 0; font-variant-numeric: tabular-nums;
+  font-family: 'Courier New', monospace; letter-spacing: 4px; color: var(--accent);
 }
 .pomodoro-controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
 .pomodoro-status { font-size: 13px; color: var(--text-2); margin-top: 12px; }
 
-/* Analytics */
-.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+/* ---- Analytics ---- */
+.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
 .stat-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
   display: flex; flex-direction: column; align-items: center; text-align: center; animation: fadeInUp 0.4s ease both;
 }
-.stat-card.large { grid-column: span 2; }
-.stat-value { font-size: 32px; font-weight: 800; color: var(--accent); margin: 12px 0 6px; }
-.stat-label { font-size: 13px; color: var(--text-2); font-weight: 600; }
-.stat-trend { font-size: 12px; margin-top: 8px; padding: 6px 12px; border-radius: 6px; background: var(--success-soft); color: var(--success); font-weight: 700; }
-.stat-trend.down { background: var(--danger-soft); color: var(--danger); }
+.stat-value { font-size: 36px; font-weight: 800; color: var(--accent); margin: 12px 0 6px; }
+.stat-trend { font-size: 12px; margin-top: 10px; padding: 6px 12px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
 
-/* Chart */
-.mini-chart { height: 80px; margin: 12px 0; display: flex; align-items: flex-end; gap: 4px; }
-.chart-bar {
-  flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; position: relative;
-  transition: opacity 0.2s ease; cursor: pointer;
+/* ---- Focus Mode ---- */
+.focus-overlay {
+  position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none;
+  flex-direction: column; align-items: center; justify-content: center; padding: 20px;
 }
-.chart-bar:hover { opacity: 0.8; }
-.chart-bar-label { font-size: 10px; color: var(--text-3); text-align: center; margin-top: 6px; }
-
-/* Time Tracking */
-.time-log {
-  background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
-  margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
-  animation: fadeInUp 0.35s ease both;
+.focus-overlay.active { display: flex; }
+.focus-timer {
+  font-size: 72px; font-weight: 800; margin: 40px 0; font-variant-numeric: tabular-nums;
+  font-family: 'Courier New', monospace; letter-spacing: 8px; color: var(--accent);
 }
-.time-log-info h4 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
-.time-log-info p { margin: 0; font-size: 12px; color: var(--text-2); }
-.time-log-duration { font-size: 16px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.focus-task { font-size: 28px; font-weight: 700; margin-bottom: 30px; text-align: center; max-width: 600px; }
+.focus-controls { display: flex; gap: 16px; margin-top: 40px; }
+.exit-focus { position: absolute; top: 20px; right: 20px; }
 
-/* Recurring Tasks */
-.recurring-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: var(--accent-soft); color: var(--accent-ink); margin-left: 8px; }
-
-/* Modal */
+/* ---- Modal ---- */
 .modal-overlay {
   position: fixed; inset: 0; background: var(--overlay); display: flex; align-items: center; justify-content: center;
   z-index: 200; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
@@ -245,92 +261,55 @@ input, select, textarea { font-family: inherit; }
 }
 .modal-overlay.show { opacity: 1; pointer-events: auto; }
 .modal-card {
-  background: var(--card); border-radius: 18px; width: 100%; max-width: 460px; padding: 26px;
+  background: var(--card); border-radius: 18px; width: 100%; max-width: 480px; padding: 28px;
   box-shadow: var(--shadow-lift); max-height: 88vh; overflow-y: auto; transform: translateY(14px) scale(0.98); opacity: 0;
   transition: transform 0.28s ease, opacity 0.28s ease;
 }
 .modal-overlay.show .modal-card { transform: translateY(0) scale(1); opacity: 1; }
-.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.modal-head h3 { margin: 0; font-size: 18px; font-weight: 700; }
-.modal-close { background: none; border: none; font-size: 18px; color: var(--text-3); cursor: pointer; padding: 4px; }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-head h3 { margin: 0; font-size: 20px; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 20px; color: var(--text-3); cursor: pointer; padding: 4px; }
 .modal-close:hover { color: var(--text); }
-.form-row { margin-bottom: 14px; }
-.form-row label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.form-row { margin-bottom: 16px; }
+.form-row label { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
 .form-row input, .form-row textarea, .form-row select {
-  width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg);
-  color: var(--text); font-size: 14px; outline: none; resize: none;
+  width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 14px; outline: none;
 }
 .form-row input:focus, .form-row textarea:focus, .form-row select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.form-row textarea { min-height: 60px; }
+.form-row textarea { min-height: 70px; resize: none; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-2); transition: all 0.18s ease; }
 .chip:hover { transform: translateY(-1px); border-color: var(--text-3); }
 .chip.selected { background: var(--text); color: var(--bg); border-color: var(--text); transform: scale(1.02); }
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 
-.checkbox-group { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border-radius: 9px; margin: 8px 0; }
-.checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
-
-/* Toast */
+/* ---- Toast ---- */
 .toast {
-  position: fixed; bottom: 26px; left: 26px; background: var(--text); color: var(--bg); padding: 11px 18px;
+  position: fixed; bottom: 26px; left: 26px; background: var(--text); color: var(--bg); padding: 12px 20px;
   border-radius: 10px; font-size: 13.5px; font-weight: 600; z-index: 500; opacity: 0; transform: translateY(10px) scale(0.96);
   transition: all 0.3s ease; pointer-events: none; display: flex; align-items: center; gap: 8px;
 }
 .toast.show { opacity: 1; transform: translateY(0) scale(1); }
 
-/* Keyboard Shortcuts */
-.shortcuts-modal {
-  position: fixed; inset: 0; background: var(--overlay); display: flex; align-items: center; justify-content: center;
-  z-index: 300; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
-}
-.shortcuts-modal.show { opacity: 1; pointer-events: auto; }
-.shortcuts-card {
-  background: var(--card); border-radius: 16px; width: 100%; max-width: 500px; padding: 30px;
-  box-shadow: var(--shadow-lift); max-height: 80vh; overflow-y: auto; transform: scale(0.95) translateY(20px); opacity: 0;
-  transition: transform 0.28s ease, opacity 0.28s ease;
-}
-.shortcuts-modal.show .shortcuts-card { transform: scale(1) translateY(0); opacity: 1; }
-.shortcuts-card h3 { margin: 0 0 20px; font-size: 20px; font-weight: 700; }
-.shortcut-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: center; }
-.shortcut-item:last-child { border-bottom: none; }
-.shortcut-key {
-  display: flex; gap: 4px; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--text-2);
-}
-.shortcut-key kbd {
-  background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px;
-  font-family: 'Courier New', monospace; font-size: 11px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.shortcut-desc { font-size: 13px; color: var(--text); font-weight: 600; }
+/* ---- Mobile Navigation ---- */
+.mobile-nav { display: none; }
 
-/* Drag & Drop zones */
-.col { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; min-height: 240px; animation: fadeInUp 0.4s ease both; }
-.col.drag-over { outline: 2px dashed var(--accent); outline-offset: -6px; background: var(--accent-soft); }
-.col-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
-.col-sub { font-size: 13px; color: var(--text-2); margin: 3px 0 16px; }
-
-.task-card {
-  background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px;
-  cursor: grab; transition: box-shadow 0.2s ease, transform 0.2s ease; margin-bottom: 10px;
-  animation: fadeInUp 0.35s ease both;
-}
-.task-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-.task-card.dragging { opacity: 0.4; }
-.task-card h4 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
-.task-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); flex-wrap: wrap; }
-.task-time-estimate { font-size: 11px; background: var(--accent-soft); color: var(--accent-ink); padding: 3px 8px; border-radius: 4px; font-weight: 700; }
-
-.empty-state { text-align: center; padding: 60px 20px; }
-.empty-state h2 { font-size: 22px; margin: 0 0 8px; }
-.empty-state p { color: var(--text-2); font-size: 14px; margin: 0 0 22px; }
-
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .sidebar { display: none; }
-  .main { padding: 16px; }
-  .analytics-grid { grid-template-columns: 1fr; }
-  .stat-card.large { grid-column: span 1; }
-  .focus-timer { font-size: 56px; letter-spacing: 4px; }
+  .main { padding: 16px 16px 90px; }
+  .board { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .summary-card { flex-direction: column; align-items: stretch; gap: 16px; }
+  .summary-stats { flex-direction: column; gap: 16px; }
+  .mobile-nav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card);
+    border-top: 1px solid var(--border); padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+    justify-content: space-around; z-index: 130;
+  }
+  .mnav-item { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-3); font-size: 10px; font-weight: 700; cursor: pointer; padding: 4px; }
+  .mnav-item.active { color: var(--accent); }
 }
 </style>
 </head>
@@ -339,19 +318,21 @@ input, select, textarea { font-family: inherit; }
 
   <!-- LOGIN VIEW -->
   <div id="view-login">
+    <div class="login-bg-blob b1"></div>
+    <div class="login-bg-blob b2"></div>
     <div class="login-card">
-      <div class="login-logo">SELF<span>-</span>CHECK PRO</div>
-      <h1 class="login-heading">Welcome</h1>
-      <p class="login-sub">Advanced task management with analytics & focus tools.</p>
+      <div class="login-logo">SELF<span>-</span>CHECK <strong>PRO</strong></div>
+      <h1 class="login-heading">Welcome back</h1>
+      <p class="login-sub">Advanced task management with focus tools, analytics & AI.</p>
       <div class="field">
-        <label for="loginEmail">Email</label>
+        <label for="loginEmail">Email address</label>
         <input id="loginEmail" type="email" placeholder="your@email.com" value="alex@self-check.app" />
       </div>
       <div class="field">
         <label for="loginPassword">Password</label>
         <input id="loginPassword" type="password" placeholder="••••••••" value="password" />
       </div>
-      <button class="btn btn-primary btn-full" id="signInBtn">Sign in</button>
+      <button class="btn btn-primary btn-full" id="signInBtn" style="margin-top: 16px;">Sign in</button>
     </div>
   </div>
 
@@ -360,136 +341,183 @@ input, select, textarea { font-family: inherit; }
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
         <span class="logo-text">SELF<span class="mark">-</span>CHECK</span>
+        <button class="collapse-btn" id="collapseBtn">⟨</button>
       </div>
       <nav class="nav-group">
         <button class="nav-item active" data-view="dashboard"><span class="ic">🏠</span><span class="nav-label">Dashboard</span></button>
+        <button class="nav-item" data-view="kanban"><span class="ic">📊</span><span class="nav-label">Kanban</span></button>
         <button class="nav-item" data-view="focus"><span class="ic">🎯</span><span class="nav-label">Focus</span></button>
-        <button class="nav-item" data-view="analytics"><span class="ic">📊</span><span class="nav-label">Analytics</span></button>
+        <button class="nav-item" data-view="analytics"><span class="ic">📈</span><span class="nav-label">Analytics</span></button>
         <button class="nav-item" data-view="today"><span class="ic">📅</span><span class="nav-label">Today</span></button>
-        <button class="nav-item" data-view="assignments"><span class="ic">📋</span><span class="nav-label">Assignments</span></button>
-        <button class="nav-item" data-view="settings"><span class="ic">⚙</span><span class="nav-label">Settings</span></button>
+        <button class="nav-item" data-view="completed"><span class="ic">✓</span><span class="nav-label">Completed</span></button>
       </nav>
+      <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);">
+        <button class="nav-item" data-view="settings"><span class="ic">⚙</span><span class="nav-label">Settings</span></button>
+      </div>
     </aside>
 
     <main class="main" id="main">
-      <!-- Dashboard -->
+      <!-- Dashboard Page -->
       <section id="page-dashboard" class="page">
         <div class="topbar">
           <div>
             <h1 class="greeting" id="greetingText">Good evening, Alex 👋</h1>
-            <p class="greeting-sub">Your productivity at a glance.</p>
+            <p class="greeting-sub">Here's what needs your attention today.</p>
           </div>
           <div class="topbar-actions">
             <button class="icon-btn" id="helpBtn" title="Keyboard shortcuts">?</button>
-            <button class="icon-btn" id="focusBtn" title="Focus mode">🎯</button>
+            <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
             <div class="avatar" id="avatarBtn">A</div>
           </div>
         </div>
-        
         <div id="dashboardBody"></div>
+      </section>
+
+      <!-- Kanban Board -->
+      <section id="page-kanban" class="page hidden">
+        <div class="topbar">
+          <div>
+            <h1 class="greeting">Kanban Board</h1>
+            <p class="greeting-sub">Drag and drop to organize your workflow.</p>
+          </div>
+          <button class="btn btn-accent" id="addTaskBtn">+ Add Task</button>
+        </div>
+        <div class="board" id="kanbanBoard"></div>
       </section>
 
       <!-- Focus Mode -->
       <section id="page-focus" class="page">
         <div class="topbar">
           <div>
-            <h1 class="greeting">Focus Session</h1>
+            <h1 class="greeting">Focus Session 🎯</h1>
             <p class="greeting-sub">Deep work mode. Minimize distractions.</p>
           </div>
         </div>
         <div class="pomodoro-card">
-          <div style="font-size: 14px; color: var(--text-2); font-weight: 600; margin-bottom: 8px;">Pomodoro Timer</div>
           <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
           <div class="pomodoro-controls">
             <button class="btn btn-accent" id="startPomodoroBtn">Start</button>
             <button class="btn btn-ghost" id="pausePomodoroBtn" disabled>Pause</button>
             <button class="btn btn-subtle" id="resetPomodoroBtn">Reset</button>
           </div>
-          <div class="pomodoro-status">
-            <div id="pomodoroStatus">Ready to focus</div>
-          </div>
+          <div class="pomodoro-status" id="pomodoroStatus">Ready to focus</div>
         </div>
-        <div id="focusTaskList"></div>
+        <button class="btn btn-accent btn-full" id="enterFocusBtn" style="margin-top: 16px;">Enter Full Focus Mode</button>
+        <div id="focusTaskList" style="margin-top: 24px;"></div>
       </section>
 
       <!-- Analytics -->
-      <section id="page-analytics" class="page">
+      <section id="page-analytics" class="page hidden">
         <div class="topbar">
-          <div>
-            <h1 class="greeting">Analytics</h1>
-            <p class="greeting-sub">Track your productivity trends.</p>
-          </div>
+          <h1 class="greeting">Analytics 📊</h1>
         </div>
         <div class="analytics-grid" id="analyticsGrid"></div>
       </section>
 
       <!-- Today -->
       <section id="page-today" class="page hidden">
-        <h1 class="greeting">Today</h1>
+        <h1 class="greeting">Today 📅</h1>
+        <p class="greeting-sub" style="margin-bottom: 20px;" id="todayDateLabel"></p>
         <div id="todayBody"></div>
       </section>
 
-      <!-- Assignments -->
-      <section id="page-assignments" class="page hidden">
-        <h1 class="greeting">Assignments</h1>
-        <div id="assignList"></div>
+      <!-- Completed -->
+      <section id="page-completed" class="page hidden">
+        <h1 class="greeting">Completed ✓</h1>
+        <div id="completedBody"></div>
       </section>
 
       <!-- Settings -->
       <section id="page-settings" class="page hidden">
-        <h1 class="greeting">Settings</h1>
-        <div class="empty-state">
-          <h2>⚙️ Settings</h2>
-          <p>Your preferences and configurations.</p>
+        <h1 class="greeting">Settings ⚙</h1>
+        <div class="summary-card" style="margin-top: 20px;">
+          <div class="summary-main">
+            <h3 style="margin: 0 0 16px;">Theme</h3>
+            <div class="chip-group">
+              <button class="chip active" data-theme="light">☀️ Light</button>
+              <button class="chip" data-theme="dark">🌙 Dark</button>
+            </div>
+          </div>
         </div>
       </section>
     </main>
 
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+      <button class="mnav-item active" data-view="dashboard"><span>🏠</span>Home</button>
+      <button class="mnav-item" data-view="today"><span>📅</span>Today</button>
+      <button class="mnav-item" data-view="focus"><span>🎯</span>Focus</button>
+      <button class="mnav-item" data-view="analytics"><span>📈</span>Stats</button>
+      <button class="mnav-item" data-view="settings"><span>⚙</span>Settings</button>
+    </nav>
+
     <!-- Focus Mode Overlay -->
-    <div class="focus-mode-overlay" id="focusModeOverlay">
-      <button class="icon-btn" id="exitFocusBtn" style="position: absolute; top: 20px; right: 20px;">✕</button>
-      <div class="focus-task-title" id="focusTaskTitle">Focus on your tasks</div>
-      <div class="focus-timer" id="focusTimer">25:00</div>
-      <div class="pomodoro-status" id="focusStatus">Get ready to focus</div>
+    <div class="focus-overlay" id="focusOverlay">
+      <button class="icon-btn exit-focus" id="exitFocusBtn">✕</button>
+      <div class="focus-task" id="focusTaskDisplay">Focus on your tasks</div>
+      <div class="focus-timer" id="focusTimerDisplay">25:00</div>
+      <div style="font-size: 14px; color: var(--text-2); margin-bottom: 30px;" id="focusStatus">Get ready to focus</div>
       <div class="focus-controls">
         <button class="btn btn-accent" id="focusStartBtn">Start Focus</button>
-        <button class="btn btn-ghost" id="focusPauseBtn" style="display:none;">Pause</button>
+        <button class="btn btn-ghost" id="focusPauseBtn" style="display: none;">Pause</button>
       </div>
     </div>
   </div>
 
-  <!-- Keyboard Shortcuts Modal -->
-  <div class="shortcuts-modal" id="shortcutsModal">
-    <div class="shortcuts-card">
-      <h3>Keyboard Shortcuts</h3>
-      <div class="shortcut-item">
-        <div class="shortcut-desc">New Task</div>
-        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>N</kbd></div>
+  <!-- Task Modal -->
+  <div class="modal-overlay" id="taskModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="taskModalTitle">Create Task</h3>
+        <button class="modal-close" id="taskModalClose">×</button>
       </div>
-      <div class="shortcut-item">
-        <div class="shortcut-desc">Focus Mode</div>
-        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>F</kbd></div>
+      <div class="form-row">
+        <label>Task name</label>
+        <input id="taskTitleInput" placeholder="What needs to be done?" />
       </div>
-      <div class="shortcut-item">
-        <div class="shortcut-desc">Analytics</div>
-        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>A</kbd></div>
+      <div class="form-row">
+        <label>Description</label>
+        <textarea id="taskDescInput" placeholder="Add details (optional)"></textarea>
       </div>
-      <div class="shortcut-item">
-        <div class="shortcut-desc">Toggle Sidebar</div>
-        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>B</kbd></div>
+      <div class="form-row">
+        <label>Category</label>
+        <div class="chip-group" id="categoryChips">
+          <button class="chip selected" data-cat="Assignment">📚 Assignment</button>
+          <button class="chip" data-cat="Study">📖 Study</button>
+          <button class="chip" data-cat="Personal">🏡 Personal</button>
+          <button class="chip" data-cat="Project">🗂 Project</button>
+        </div>
       </div>
-      <div class="shortcut-item">
-        <div class="shortcut-desc">Search Tasks</div>
-        <div class="shortcut-key"><kbd>Ctrl</kbd> + <kbd>F</kbd></div>
+      <div class="two-col">
+        <div class="form-row">
+          <label>Due date</label>
+          <input id="taskDateInput" type="date" />
+        </div>
+        <div class="form-row">
+          <label>Due time</label>
+          <input id="taskTimeInput" type="time" />
+        </div>
       </div>
-      <div class="shortcut-item">
-        <div class="shortcut-desc">Close Modal</div>
-        <div class="shortcut-key"><kbd>Esc</kbd></div>
+      <div class="form-row">
+        <label>Priority</label>
+        <div class="chip-group" id="priorityChips">
+          <button class="chip" data-pri="Low">Low</button>
+          <button class="chip selected" data-pri="Medium">Medium</button>
+          <button class="chip" data-pri="High">High</button>
+        </div>
       </div>
-      <button class="btn btn-accent btn-full" id="closeShortcutsBtn" style="margin-top: 20px;">Close</button>
+      <div class="form-row">
+        <label>Time estimate (minutes)</label>
+        <input id="taskTimeEstimate" type="number" placeholder="60" value="60" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="taskModalCancel">Cancel</button>
+        <button class="btn btn-accent" id="taskModalSave">Create Task</button>
+      </div>
     </div>
   </div>
 
+  <!-- Toast Notification -->
   <div class="toast" id="toast"></div>
 </div>
 
@@ -497,28 +525,30 @@ input, select, textarea { font-family: inherit; }
 (function(){
   "use strict";
 
+  // Utilities
   var uid = function(){ return 't' + Math.random().toString(36).slice(2,10); };
   var todayISO = function(){ return new Date().toISOString().slice(0,10); };
   var TODAY = new Date();
   var todayStr = todayISO();
 
+  // State
   var state = {
     tasks: [
-      { id: uid(), title:"Complete Java Assignment", category:"Assignment", priority:"High", status:"pending", dueDate: todayStr, dueTime:"19:00", timeEstimate: 120, timeSpent: 45, recurring: "weekly", createdAt: Date.now(), completedAt:null },
-      { id: uid(), title:"Review Python concepts", category:"Study", priority:"Medium", status:"pending", dueDate: todayStr, dueTime:"10:00", timeEstimate: 90, timeSpent: 0, recurring: null, createdAt: Date.now(), completedAt:null },
-      { id: uid(), title:"Project research", category:"Project", priority:"Medium", status:"pending", dueDate: todayStr, dueTime:"14:00", timeEstimate: 180, timeSpent: 60, recurring: null, createdAt: Date.now(), completedAt:null },
+      { id: uid(), title:"Complete Java Assignment", description:"Finish inheritance exercises.", category:"Assignment", priority:"High", status:"pending", dueDate: todayStr, dueTime:"19:00", timeEstimate: 120, timeSpent: 45, createdAt: Date.now(), completedAt: null },
+      { id: uid(), title:"Review Python concepts", description:"Study decorators & generators.", category:"Study", priority:"Medium", status:"pending", dueDate: todayStr, dueTime:"10:00", timeEstimate: 90, timeSpent: 0, createdAt: Date.now(), completedAt: null },
+      { id: uid(), title:"Project research", description:"Collect sources for proposal.", category:"Project", priority:"Medium", status:"pending", dueDate: todayStr, dueTime:"14:00", timeEstimate: 180, timeSpent: 60, createdAt: Date.now(), completedAt: null },
+      { id: uid(), title:"Submit project report", description:"PDF export & upload.", category:"Project", priority:"High", status:"completed", dueDate: todayStr, dueTime:"16:00", timeEstimate: 120, timeSpent: 90, createdAt: Date.now(), completedAt: Date.now()-3600000 },
     ],
     theme: 'light',
-    themeMode: 'light',
     streak: 5,
-    settings: { emailReminders:true, dueSoon:true, pomodoroLength: 25 },
-    user: { name: 'Alex', email: 'alex@self-check.app' },
-    pomodoroRunning: false,
     pomodoroTime: 25 * 60,
-    completedToday: 0,
-    totalTimeFocused: 0
+    pomodoroRunning: false,
+    focusTime: 0,
+    totalFocusTime: 0,
+    user: { name: 'Alex', email: 'alex@self-check.app' }
   };
 
+  // Helpers
   function showToast(msg){
     var t = document.getElementById('toast');
     t.textContent = msg;
@@ -527,16 +557,32 @@ input, select, textarea { font-family: inherit; }
   }
 
   function escapeHtml(s){
-    var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML;
+    var d = document.createElement('div'); d.textContent = s; return d.innerHTML;
   }
 
-  /* ===================== THEME ===================== */
+  function fmtDate(iso){
+    if (!iso) return '';
+    var d = new Date(iso + 'T00:00:00');
+    if (iso === todayStr) return 'Today';
+    var tomorrow = new Date(TODAY); tomorrow.setDate(tomorrow.getDate() + 1);
+    if (iso === tomorrow.toISOString().slice(0,10)) return 'Tomorrow';
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  function fmtTime(t){
+    if (!t) return '';
+    var parts = t.split(':'); var h = parseInt(parts[0], 10); var m = parts[1];
+    var ap = h >= 12 ? 'PM' : 'AM'; var h12 = h % 12 || 12;
+    return h12 + ':' + m + ' ' + ap;
+  }
+
+  // Theme
   function applyTheme(){
     document.documentElement.setAttribute('data-theme', state.theme);
   }
 
-  /* ===================== NAVIGATION ===================== */
-  var pages = ['dashboard','focus','analytics','today','assignments','settings'];
+  // Navigation
+  var pages = ['dashboard', 'kanban', 'focus', 'analytics', 'today', 'completed', 'settings'];
   function goTo(view){
     pages.forEach(function(p){
       document.getElementById('page-' + p).classList.toggle('hidden', p !== view);
@@ -544,12 +590,16 @@ input, select, textarea { font-family: inherit; }
     document.querySelectorAll('.nav-item').forEach(function(n){
       n.classList.toggle('active', n.getAttribute('data-view') === view);
     });
+    document.querySelectorAll('.mnav-item').forEach(function(n){
+      n.classList.toggle('active', n.getAttribute('data-view') === view);
+    });
   }
+
   document.querySelectorAll('[data-view]').forEach(function(el){
     el.addEventListener('click', function(){ goTo(el.getAttribute('data-view')); });
   });
 
-  /* ===================== POMODORO TIMER ===================== */
+  // Pomodoro
   var pomodoroInterval;
   function updatePomodoroDisplay(){
     var mins = Math.floor(state.pomodoroTime / 60);
@@ -557,7 +607,7 @@ input, select, textarea { font-family: inherit; }
     var display = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
     var el = document.getElementById('pomodoroDisplay');
     if (el) el.textContent = display;
-    var focusEl = document.getElementById('focusTimer');
+    var focusEl = document.getElementById('focusTimerDisplay');
     if (focusEl) focusEl.textContent = display;
   }
 
@@ -574,8 +624,8 @@ input, select, textarea { font-family: inherit; }
       } else {
         clearInterval(pomodoroInterval);
         state.pomodoroRunning = false;
-        showToast('🍅 Pomodoro complete! Take a break.');
-        state.pomodoroTime = state.settings.pomodoroLength * 60;
+        showToast('🍅 Pomodoro complete! Great work.');
+        state.pomodoroTime = 25 * 60;
         updatePomodoroDisplay();
         document.getElementById('pausePomodoroBtn').disabled = true;
         document.getElementById('startPomodoroBtn').disabled = false;
@@ -586,42 +636,51 @@ input, select, textarea { font-family: inherit; }
   document.getElementById('pausePomodoroBtn').addEventListener('click', function(){
     state.pomodoroRunning = false;
     clearInterval(pomodoroInterval);
-    document.getElementById('pausePomodoroBtn').disabled = true;
+    this.disabled = true;
     document.getElementById('startPomodoroBtn').disabled = false;
   });
 
   document.getElementById('resetPomodoroBtn').addEventListener('click', function(){
     state.pomodoroRunning = false;
     clearInterval(pomodoroInterval);
-    state.pomodoroTime = state.settings.pomodoroLength * 60;
+    state.pomodoroTime = 25 * 60;
     updatePomodoroDisplay();
     document.getElementById('pausePomodoroBtn').disabled = true;
     document.getElementById('startPomodoroBtn').disabled = false;
   });
 
-  /* ===================== FOCUS MODE ===================== */
-  var focusInterval;
-  var focusTime = 0;
-  
-  document.getElementById('focusBtn').addEventListener('click', function(){ document.getElementById('focusModeOverlay').classList.add('active'); });
-  document.getElementById('exitFocusBtn').addEventListener('click', function(){ document.getElementById('focusModeOverlay').classList.remove('active'); });
+  // Focus Mode
+  document.getElementById('enterFocusBtn').addEventListener('click', function(){
+    document.getElementById('focusOverlay').classList.add('active');
+    state.pomodoroTime = 25 * 60;
+    updatePomodoroDisplay();
+  });
 
+  document.getElementById('exitFocusBtn').addEventListener('click', function(){
+    document.getElementById('focusOverlay').classList.remove('active');
+    if (state.pomodoroRunning) {
+      state.pomodoroRunning = false;
+      clearInterval(pomodoroInterval);
+    }
+  });
+
+  var focusInterval;
   document.getElementById('focusStartBtn').addEventListener('click', function(){
     state.pomodoroRunning = true;
-    focusTime = 0;
+    state.focusTime = 0;
     this.style.display = 'none';
     document.getElementById('focusPauseBtn').style.display = 'block';
-    document.getElementById('focusStatus').textContent = 'Focus mode active - minimize distractions';
+    document.getElementById('focusStatus').textContent = 'Focus mode active - eliminate distractions';
     
     focusInterval = setInterval(function(){
-      focusTime++;
+      state.focusTime++;
       state.pomodoroTime--;
       if (state.pomodoroTime < 0) {
         clearInterval(focusInterval);
         state.pomodoroRunning = false;
-        state.totalTimeFocused += focusTime;
-        showToast('✓ Focus session complete - ' + Math.floor(focusTime/60) + ' mins focused');
-        document.getElementById('focusModeOverlay').classList.remove('active');
+        state.totalFocusTime += state.focusTime;
+        showToast('✓ Focus complete - ' + Math.floor(state.focusTime / 60) + ' mins focused');
+        document.getElementById('focusOverlay').classList.remove('active');
       }
       updatePomodoroDisplay();
     }, 1000);
@@ -630,61 +689,38 @@ input, select, textarea { font-family: inherit; }
   document.getElementById('focusPauseBtn').addEventListener('click', function(){
     clearInterval(focusInterval);
     state.pomodoroRunning = false;
-    state.totalTimeFocused += focusTime;
+    state.totalFocusTime += state.focusTime;
     this.style.display = 'none';
     document.getElementById('focusStartBtn').style.display = 'block';
   });
 
-  /* ===================== ANALYTICS ===================== */
-  function renderAnalytics(){
-    var completed = state.tasks.filter(function(t){ return t.status === 'completed'; }).length;
-    var total = state.tasks.length;
-    var avgTimeSpent = state.tasks.length > 0 ? Math.round(state.tasks.reduce(function(sum, t){ return sum + t.timeSpent; }, 0) / state.tasks.length) : 0;
-    var totalTimeLogged = state.tasks.reduce(function(sum, t){ return sum + t.timeSpent; }, 0);
-
-    var html = '';
-    html += '<div class="stat-card"><div class="stat-value">' + completed + '</div><div class="stat-label">Tasks Completed</div><div class="stat-trend">This week</div></div>';
-    html += '<div class="stat-card"><div class="stat-value">' + state.streak + '</div><div class="stat-label">Day Streak 🔥</div><div class="stat-trend">Keep it up!</div></div>';
-    html += '<div class="stat-card"><div class="stat-value">' + avgTimeSpent + '</div><div class="stat-label">Avg Time per Task</div><div class="stat-label" style="font-size:11px; margin-top:4px;">in minutes</div></div>';
-    html += '<div class="stat-card"><div class="stat-value">' + Math.floor(state.totalTimeFocused/60) + '</div><div class="stat-label">Total Focus Time</div><div class="stat-label" style="font-size:11px; margin-top:4px;">in hours</div></div>';
-
-    html += '<div class="stat-card large"><div style="width:100%;"><div class="stat-label" style="text-align:left; margin-bottom:12px;">Completion by Priority</div>';
-    html += '<div class="mini-chart">';
-    ['High', 'Medium', 'Low'].forEach(function(pri){
-      var count = state.tasks.filter(function(t){ return t.priority === pri; }).length;
-      html += '<div style="flex:1; display:flex; flex-direction:column; align-items:center;"><div class="chart-bar" style="height:' + (count*20) + 'px;"></div><div class="chart-bar-label">' + pri + '</div></div>';
-    });
-    html += '</div></div></div>';
-
-    html += '<div class="stat-card large"><div style="width:100%;"><div class="stat-label" style="text-align:left; margin-bottom:12px;">Time Logged by Category</div>';
-    html += '<div class="mini-chart">';
-    ['Assignment', 'Study', 'Project'].forEach(function(cat){
-      var time = state.tasks.filter(function(t){ return t.category === cat; }).reduce(function(sum, t){ return sum + t.timeSpent; }, 0);
-      html += '<div style="flex:1; display:flex; flex-direction:column; align-items:center;"><div class="chart-bar" style="height:' + (time/10) + 'px;"></div><div class="chart-bar-label">' + Math.round(time/60) + 'h</div></div>';
-    });
-    html += '</div></div></div>';
-
-    document.getElementById('analyticsGrid').innerHTML = html;
-  }
-
-  /* ===================== DASHBOARD ===================== */
+  // Render Dashboard
   function renderDashboard(){
     var pending = state.tasks.filter(function(t){ return t.status === 'pending'; });
-    var html = '';
-    
-    html += '<div style="margin-bottom:24px;"><h2 style="font-size:16px; font-weight:700; margin:0 0 12px;">Your Tasks Today</h2>';
+    var completed = state.tasks.filter(function(t){ return t.status === 'completed'; });
+    var total = state.tasks.length;
+    var completionPct = total > 0 ? Math.round((completed.length / total) * 100) : 0;
+
+    var html = '<div class="summary-card">';
+    html += '<div class="summary-main"><p class="summary-title">Today\'s Progress</p>';
+    html += '<div class="progress-track"><div class="progress-fill" style="width: ' + completionPct + '%"></div></div>';
+    html += '<p class="progress-label">' + completed.length + ' / ' + total + ' completed</p></div>';
+    html += '<div class="summary-stats">';
+    html += '<div class="stat"><div class="stat-num">' + total + '</div><div class="stat-label">Total Tasks</div></div>';
+    html += '<div class="stat"><div class="stat-num">' + pending.length + '</div><div class="stat-label">Pending</div></div>';
+    html += '<div class="stat"><div class="stat-num">' + state.streak + '</div><div class="stat-label">Day Streak 🔥</div></div>';
+    html += '<div class="stat"><div class="stat-num">' + Math.floor(state.totalFocusTime / 60) + '</div><div class="stat-label">Focus Hours</div></div>';
+    html += '</div></div>';
+
+    html += '<div style="margin-top: 24px;"><h2 style="font-size: 16px; font-weight: 700; margin: 0 0 16px;">Next Tasks</h2>';
     if (pending.length === 0) {
-      html += '<div class="empty-state" style="padding:30px;"><p>All tasks completed! 🎉</p></div>';
+      html += '<div class="empty-col" style="padding: 40px 20px; background: var(--card); border-radius: 12px;">All caught up! 🎉</div>';
     } else {
-      pending.forEach(function(t){
-        var hoursLeft = t.timeEstimate - t.timeSpent;
-        html += '<div class="task-card">' +
+      pending.slice(0, 5).forEach(function(t){
+        html += '<div class="task-card" style="margin-bottom: 12px;">' +
           '<h4>' + escapeHtml(t.title) + '</h4>' +
-          '<div class="task-meta">' +
-          '<span>' + t.category + '</span>' +
-          '<span class="task-time-estimate">⏱ ' + t.timeEstimate + ' min</span>';
-        if (t.recurring) html += '<span class="recurring-badge">↻ ' + t.recurring + '</span>';
-        html += '</div></div>';
+          '<div class="task-meta"><span>' + t.category + '</span><span>·</span><span>' + fmtTime(t.dueTime) + '</span>' +
+          '<span class="priority-pill priority-' + t.priority + '">' + t.priority + '</span></div></div>';
       });
     }
     html += '</div>';
@@ -692,31 +728,185 @@ input, select, textarea { font-family: inherit; }
     document.getElementById('dashboardBody').innerHTML = html;
   }
 
-  /* ===================== TODAY PAGE ===================== */
+  // Render Kanban
+  function renderKanban(){
+    var pending = state.tasks.filter(function(t){ return t.status === 'pending'; });
+    var completed = state.tasks.filter(function(t){ return t.status === 'completed'; });
+
+    var html = '';
+    html += '<div class="col">';
+    html += '<h3 class="col-title">To Do</h3><p class="col-sub">' + pending.length + ' tasks</p>';
+    html += '<div class="task-list">';
+    if (pending.length === 0) {
+      html += '<div class="empty-col">No pending tasks</div>';
+    } else {
+      pending.forEach(function(t){
+        html += '<div class="task-card"><h4>' + escapeHtml(t.title) + '</h4>' +
+          '<div class="task-meta"><span>' + t.category + '</span><span class="priority-pill priority-' + t.priority + '">' + t.priority + '</span></div></div>';
+      });
+    }
+    html += '</div></div>';
+
+    html += '<div class="col">';
+    html += '<h3 class="col-title">Completed ✓</h3><p class="col-sub">' + completed.length + ' tasks</p>';
+    html += '<div class="task-list">';
+    if (completed.length === 0) {
+      html += '<div class="empty-col">No completed tasks yet</div>';
+    } else {
+      completed.forEach(function(t){
+        html += '<div class="task-card"><h4 style="text-decoration: line-through; color: var(--text-2);">' + escapeHtml(t.title) + '</h4></div>';
+      });
+    }
+    html += '</div></div>';
+
+    document.getElementById('kanbanBoard').innerHTML = html;
+  }
+
+  // Render Analytics
+  function renderAnalytics(){
+    var completed = state.tasks.filter(function(t){ return t.status === 'completed'; }).length;
+    var total = state.tasks.length;
+    var avgTime = total > 0 ? Math.round(state.tasks.reduce(function(s, t){ return s + t.timeSpent; }, 0) / total) : 0;
+    var totalLogged = state.tasks.reduce(function(s, t){ return s + t.timeSpent; }, 0);
+
+    var html = '';
+    html += '<div class="stat-card"><div class="stat-value">' + completed + '</div><div class="stat-label">Completed</div><div class="stat-trend">This week</div></div>';
+    html += '<div class="stat-card"><div class="stat-value">' + state.streak + '</div><div class="stat-label">Day Streak</div><div class="stat-trend">Keep going!</div></div>';
+    html += '<div class="stat-card"><div class="stat-value">' + avgTime + '</div><div class="stat-label">Avg Time</div><div class="stat-label" style="font-size: 11px;">per task</div></div>';
+    html += '<div class="stat-card"><div class="stat-value">' + totalLogged + '</div><div class="stat-label">Total Logged</div><div class="stat-label" style="font-size: 11px;">minutes</div></div>';
+    html += '<div class="stat-card"><div class="stat-value">' + Math.floor(state.totalFocusTime / 60) + '</div><div class="stat-label">Focus Hours</div><div class="stat-trend">Sessions completed</div></div>';
+    html += '<div class="stat-card"><div class="stat-value">' + Math.round((completed / total) * 100) + '%</div><div class="stat-label">Completion</div><div class="stat-trend">Overall rate</div></div>';
+
+    document.getElementById('analyticsGrid').innerHTML = html;
+  }
+
+  // Render Today
   function renderToday(){
+    document.getElementById('todayDateLabel').textContent = TODAY.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
     var todays = state.tasks.filter(function(t){ return t.dueDate === todayStr; });
     var html = '';
     if (todays.length === 0) {
-      html = '<div class="empty-state"><p>No tasks for today.</p></div>';
+      html = '<div class="empty-col" style="padding: 60px 20px; background: var(--card); border-radius: 12px;">No tasks for today</div>';
     } else {
       todays.forEach(function(t){
-        html += '<div class="time-log">' +
-          '<div class="time-log-info"><h4>' + escapeHtml(t.title) + '</h4><p>' + t.dueTime + ' • ' + t.category + '</p></div>' +
-          '<div class="time-log-duration">' + t.timeSpent + '/' + t.timeEstimate + ' min</div></div>';
+        html += '<div class="task-card" style="margin-bottom: 12px;">' +
+          '<h4>' + escapeHtml(t.title) + '</h4>' +
+          '<div class="task-meta"><span>' + fmtTime(t.dueTime) + '</span><span>·</span><span>' + t.category + '</span><span class="priority-pill priority-' + t.priority + '">' + t.priority + '</span></div></div>';
       });
     }
     document.getElementById('todayBody').innerHTML = html;
   }
 
-  /* ===================== RENDER ===================== */
-  function render(){
-    renderDashboard();
-    renderAnalytics();
-    renderToday();
+  // Render Completed
+  function renderCompleted(){
+    var completed = state.tasks.filter(function(t){ return t.status === 'completed'; });
+    var html = '';
+    if (completed.length === 0) {
+      html = '<div class="empty-col" style="padding: 60px 20px; background: var(--card); border-radius: 12px;">No completed tasks yet</div>';
+    } else {
+      completed.forEach(function(t){
+        html += '<div class="task-card" style="margin-bottom: 12px;">' +
+          '<h4 style="text-decoration: line-through; color: var(--text-2);">✓ ' + escapeHtml(t.title) + '</h4>' +
+          '<div class="task-meta"><span>' + t.category + '</span><span>·</span><span>' + fmtDate(t.dueDate) + '</span></div></div>';
+      });
+    }
+    document.getElementById('completedBody').innerHTML = html;
   }
 
-  /* ===================== LOGIN ===================== */
-  function performLogin(){
+  // Render All
+  function render(){
+    renderDashboard();
+    renderKanban();
+    renderAnalytics();
+    renderToday();
+    renderCompleted();
+  }
+
+  // Task Modal
+  document.getElementById('addTaskBtn').addEventListener('click', function(){
+    document.getElementById('taskTitleInput').value = '';
+    document.getElementById('taskDescInput').value = '';
+    document.getElementById('taskDateInput').value = todayStr;
+    document.getElementById('taskTimeInput').value = '18:00';
+    document.getElementById('taskTimeEstimate').value = '60';
+    document.getElementById('taskModalTitle').textContent = 'Create Task';
+    document.getElementById('taskModalSave').textContent = 'Create Task';
+    setSelectedChip('categoryChips', 'data-cat', 'Assignment');
+    setSelectedChip('priorityChips', 'data-pri', 'Medium');
+    document.getElementById('taskModal').classList.add('show');
+  });
+
+  document.getElementById('taskModalClose').addEventListener('click', function(){ document.getElementById('taskModal').classList.remove('show'); });
+  document.getElementById('taskModalCancel').addEventListener('click', function(){ document.getElementById('taskModal').classList.remove('show'); });
+  document.getElementById('taskModal').addEventListener('click', function(e){ if (e.target === this) this.classList.remove('show'); });
+
+  function setSelectedChip(groupId, attr, value){
+    document.querySelectorAll('#' + groupId + ' .chip').forEach(function(c){
+      c.classList.toggle('selected', c.getAttribute(attr) === value);
+    });
+  }
+
+  document.getElementById('categoryChips').addEventListener('click', function(e){
+    var chip = e.target.closest('.chip'); if (!chip) return;
+    setSelectedChip('categoryChips', 'data-cat', chip.getAttribute('data-cat'));
+  });
+
+  document.getElementById('priorityChips').addEventListener('click', function(e){
+    var chip = e.target.closest('.chip'); if (!chip) return;
+    document.querySelectorAll('#priorityChips .chip').forEach(function(c){ c.classList.remove('selected'); });
+    chip.classList.add('selected');
+  });
+
+  document.getElementById('taskModalSave').addEventListener('click', function(){
+    var title = document.getElementById('taskTitleInput').value.trim();
+    if (!title) { document.getElementById('taskTitleInput').focus(); return; }
+    
+    var cat = document.querySelector('#categoryChips .chip.selected').getAttribute('data-cat');
+    var pri = document.querySelector('#priorityChips .chip.selected').getAttribute('data-pri');
+    
+    state.tasks.push({
+      id: uid(),
+      title: title,
+      description: document.getElementById('taskDescInput').value.trim(),
+      category: cat,
+      priority: pri,
+      status: 'pending',
+      dueDate: document.getElementById('taskDateInput').value,
+      dueTime: document.getElementById('taskTimeInput').value,
+      timeEstimate: parseInt(document.getElementById('taskTimeEstimate').value || 60, 10),
+      timeSpent: 0,
+      createdAt: Date.now(),
+      completedAt: null
+    });
+    
+    showToast('✓ Task created');
+    document.getElementById('taskModal').classList.remove('show');
+    render();
+  });
+
+  // Theme
+  document.querySelectorAll('[data-theme]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-theme]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.theme = btn.getAttribute('data-theme');
+      applyTheme();
+    });
+  });
+
+  // Sidebar toggle
+  document.getElementById('collapseBtn').addEventListener('click', function(){
+    var sb = document.getElementById('sidebar');
+    sb.classList.toggle('collapsed');
+    this.textContent = sb.classList.contains('collapsed') ? '⟩' : '⟨';
+  });
+
+  // Settings
+  document.getElementById('settingsBtn').addEventListener('click', function(){ goTo('settings'); });
+  document.getElementById('helpBtn').addEventListener('click', function(){ showToast('? Keyboard shortcuts coming soon'); });
+
+  // Login
+  document.getElementById('signInBtn').addEventListener('click', function(){
     var email = document.getElementById('loginEmail').value.trim();
     if (!email) return;
     state.user.email = email;
@@ -727,29 +917,13 @@ input, select, textarea { font-family: inherit; }
     document.getElementById('avatarBtn').textContent = state.user.name.charAt(0).toUpperCase();
     applyTheme();
     render();
-  }
-
-  document.getElementById('signInBtn').addEventListener('click', performLogin);
-  document.getElementById('loginPassword').addEventListener('keydown', function(e){ if (e.key === 'Enter') performLogin(); });
-
-  /* ===================== KEYBOARD SHORTCUTS ===================== */
-  document.addEventListener('keydown', function(e){
-    if (e.ctrlKey || e.metaKey) {
-      if (e.key === 'n') { e.preventDefault(); showToast('+ New task'); }
-      if (e.key === 'f') { e.preventDefault(); goTo('focus'); }
-      if (e.key === 'a') { e.preventDefault(); goTo('analytics'); }
-      if (e.key === 'b') { e.preventDefault(); document.getElementById('sidebar').classList.toggle('collapsed'); }
-    }
-    if (e.key === '?') { document.getElementById('shortcutsModal').classList.add('show'); }
-    if (e.key === 'Escape') { document.getElementById('shortcutsModal').classList.remove('show'); }
   });
 
-  document.getElementById('helpBtn').addEventListener('click', function(){ document.getElementById('shortcutsModal').classList.add('show'); });
-  document.getElementById('closeShortcutsBtn').addEventListener('click', function(){ document.getElementById('shortcutsModal').classList.remove('show'); });
-  document.getElementById('shortcutsModal').addEventListener('click', function(e){ if (e.target === this) this.classList.remove('show'); });
+  document.getElementById('loginPassword').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('signInBtn').click(); });
 
-  /* ===================== INIT ===================== */
+  // Init
   updatePomodoroDisplay();
+  applyTheme();
 })();
 </script>
 </body>
